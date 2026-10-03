@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = ["crates/dtap-core", "crates/dtap-app", "crates/dtap-gateway"]
+
+[profile.wasm-dev]
+inherits = "dev"
+opt-level = 1
+
+[profile.server-dev]
+inherits = "dev"
+
+[profile.android-dev]
+inherits = "dev"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = true
