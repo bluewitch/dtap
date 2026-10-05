@@ -1,6 +1,6 @@
 # DTap
 
-A Point Of Sale (POS) App for merchants who need relief from Stripe, Square, and centralized encroachment into their margins  tap-mix-pay. A cashier rings a USD amount. The customer pays by QR or an NFC Bolt Card. Settlement runs through BTCPay on hardware the shop controls. Spend keys never sit on that server.
+A Point Of Sale (POS) App for merchants who need relief from Stripe, Square, and centralized encroachment into their margins  tap-mix-pay. A cashier rings a USD amount. The customer pays by QR or an [NFC Bolt Card](https://www.boltcard.org/). Settlement runs through BTCPay on hardware the shop controls. Spend keys never sit on that server.
 
 Open source. Rust workspace. Dioxus 0.7 counter. Early: the terminal UI is in tree, the gateway is a stub.
 
