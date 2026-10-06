@@ -2,7 +2,9 @@
 
 A Point Of Sale (POS) App for merchants who need relief from Stripe, Square, and centralized encroachment into their margins  tap-mix-pay. A cashier rings a $USD amount. The customer pays by QR or an [NFC Bolt Card](https://www.boltcard.org/). Settlement runs through a secured server with [BTCPay Server](https://btcpayserver.org/) and a [full $BTC node](https://bitcoin.org/en/full-node) explorer, on hardware the shop controls. Spend keys never sit on that server.
 
-Open source. Rust workspace. Dioxus 0.7 counter. Early: the terminal UI is in tree, the gateway is a stub.
+Open source, under MIT license. Developed with the [Rust Language](https://rust-lang.org/) using [Dioxus 0.7](https://dioxuslabs.com/learn/0.7/) for Web, Desktop, and Mobile. Early: the terminal UI is in tree, the gateway is a stub.  DTap,
+at its core, is meant to manage crypto holdings and digital capital, converting and exchanging on-chain, until a 
+fiat bridge is required, if it is ever required.
 
 ## Architecture
 
