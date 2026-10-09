@@ -1,6 +1,6 @@
 # DTap
 
-A [Point Of Sale (POS)](https://en.wikipedia.org/wiki/Point_of_sale) App for merchants who need relief from [Stripe](https://stripe.com/), [Square](https://squareup.com/us/en), and centralized encroachment into their margins  tap-mix-pay. A cashier rings a $USD amount. The customer pays by QR or an [NFC Bolt Card](https://www.boltcard.org/). Settlement runs through a secured server with [BTCPay Server](https://btcpayserver.org/) and a [full $BTC node](https://bitcoin.org/en/full-node) explorer, on hardware the shop controls. Spend keys never sit on that server.
+A [Point Of Sale (POS)](https://en.wikipedia.org/wiki/Point_of_sale) App for merchants who need relief from [Stripe](https://stripe.com/), [Square](https://squareup.com/us/en), [Toast](https://pos.toasttab.com/), or [Clover](https://www.clover.com/) and centralized encroachment into their margins  tap-mix-pay. A cashier rings a $USD amount. The customer pays by QR or an [NFC Bolt Card](https://www.boltcard.org/). Settlement runs through a secured server with [BTCPay Server](https://btcpayserver.org/) and a [full $BTC node](https://bitcoin.org/en/full-node) explorer, on hardware the shop controls. Spend keys never sit on that server.
 
 Open source, under MIT license. Developed with the [Rust Language](https://rust-lang.org/) using [Dioxus 0.7](https://dioxuslabs.com/learn/0.7/) for Web, Desktop, and Mobile. Early: the terminal UI is in tree, the gateway is a stub.  DTap,
 at its core, is meant to manage crypto holdings and digital capital, converting and exchanging on-chain, until a 
