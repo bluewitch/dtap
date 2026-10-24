@@ -51,9 +51,24 @@ flowchart TB
     TAP -->|pay invoice from card float| LN
     PAY --> NODE
     LN --> NODE
+
     PAY -.->|xpub / descriptor only| SP
     SP -->|PSBT signed offline| PAY
     METAL --- SP
     LN -->|sweep surplus| SP
     HOT --- LN
     WARM --- SP
+```
+
+## Wallets Ready?
+
+What “ready” means before any real wallet
+
+- Analog notebook (or stamped metal) with the exact words, written by hand, stored where you already keep other irreplaceable things.
+- Passphrase separate from the seed.
+- Sparrow watch-only xpub/descriptor exported and verified on an air-gapped machine.
+- Lightning (LND aezeed) created only as float, never from the same seed as the cold stack.
+- XMR view key / wallet created the same careful way.
+
+Only then import the public material into BTCPay on BlackVault.
+Until those exist, the gateway and the app should not be able to spend anything.
