@@ -27,7 +27,9 @@ pub struct Rail {
 }
 
 impl Rail {
-    fn up(&self) -> String { self.id.to_ascii_uppercase() }
+    fn up(&self) -> String {
+        self.id.to_ascii_uppercase()
+    }
 
     pub fn is_lightning(&self) -> bool {
         let u = self.up();
@@ -36,12 +38,19 @@ impl Rail {
 
     pub fn css(&self) -> &'static str {
         let u = self.up();
-        if u.contains("USDT") || u.contains("USDC") { "stable" }
-        else if self.is_lightning() || u.contains("LNURL") { "ln" }
-        else if u.starts_with("XMR") { "xmr" }
-        else if u.starts_with("LBTC") { "liquid" }
-        else if u.starts_with("BTC") { "btc" }
-        else { "alt" }
+        if u.contains("USDT") || u.contains("USDC") {
+            "stable"
+        } else if self.is_lightning() || u.contains("LNURL") {
+            "ln"
+        } else if u.starts_with("XMR") {
+            "xmr"
+        } else if u.starts_with("LBTC") {
+            "liquid"
+        } else if u.starts_with("BTC") {
+            "btc"
+        } else {
+            "alt"
+        }
     }
 
     pub fn label(&self) -> &'static str {
@@ -57,7 +66,13 @@ impl Rail {
 }
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq)]
-pub enum ChargeStatus { New, Processing, Settled, Expired, Invalid }
+pub enum ChargeStatus {
+    New,
+    Processing,
+    Settled,
+    Expired,
+    Invalid,
+}
 
 impl ChargeStatus {
     pub fn from_btcpay(s: &str) -> Self {
@@ -74,14 +89,26 @@ impl ChargeStatus {
     }
     pub fn css(self) -> &'static str {
         match self {
-            Self::New => "new", Self::Processing => "processing",
-            Self::Settled => "settled", Self::Expired => "expired", Self::Invalid => "invalid",
+            Self::New => "new",
+            Self::Processing => "processing",
+            Self::Settled => "settled",
+            Self::Expired => "expired",
+            Self::Invalid => "invalid",
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct TapRequest { pub invoice_id: String, pub lnurlw: String }
+pub struct TapRequest {
+    pub invoice_id: String,
+    pub lnurlw: String,
+}
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
-pub struct SwapQuote { pub from: String, pub to: String, pub rate: String, pub min: String, pub max: String }
+pub struct SwapQuote {
+    pub from: String,
+    pub to: String,
+    pub rate: String,
+    pub min: String,
+    pub max: String,
+}

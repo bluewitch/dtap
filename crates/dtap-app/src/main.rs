@@ -37,8 +37,9 @@ fn App() -> Element {
 fn Shell() -> Element {
     let health = use_resource(api::health);
     let (chip, txt) = match &*health.read() {
-        Some(Ok(true)) => ("chip online", "BLACKVAULT // LINKED"),
-        Some(_) => ("chip offline", "BLACKVAULT // DOWN"),
+        Some(Ok(h)) if h.mock => ("chip demo", "DEMO MODE"),
+        Some(Ok(h)) if h.blackvault => ("chip online", "BLACKVAULT // LINKED"),
+        Some(Ok(_)) | Some(Err(_)) => ("chip offline", "BLACKVAULT // DOWN"),
         None => ("chip", "BLACKVAULT // …"),
     };
 
@@ -51,7 +52,6 @@ fn Shell() -> Element {
         main { class: "stage", Outlet::<Route> {} }
         nav { class: "tabbar",
             Link { to: Route::Terminal {}, class: "tab", active_class: "active", "▣ TERMINAL" }
-            Link { to: Route::Swap {}, class: "tab", active_class: "active", "⇄ EXCHANGE LAB" }
         }
     }
 }
