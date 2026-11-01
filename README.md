@@ -59,10 +59,10 @@ The app chip reads `mock` (`#[serde(default)]`, so an older payload still decode
 Other gateway environment:
 
 - `DTAP_BIND` — listen address, default `127.0.0.1:8787`
-- `DTAP_TERMINAL_TOKEN` — bearer token, default `dev-terminal-token` (a dev default, not a BTCPay key)
+- `DTAP_TERMINAL_TOKEN` — bearer token. In mock mode it defaults to the public `dev-terminal-token`. Outside mock mode it is required, must be at least 32 characters, and the dev token is refused, so the gateway will not start with it. Generate one with `openssl rand -hex 32`.
 - `DTAP_CORS_ORIGINS` — comma-separated origins, default `http://127.0.0.1:8080,http://localhost:8080`
 
-Allowed CORS headers are `authorization`, `content-type`, and `x-dtap-mock-status`. Browser preflight is not authenticated. Every other route requires `Authorization: Bearer <DTAP_TERMINAL_TOKEN>` and returns `401` JSON `{"error":"unauthorized"}` otherwise. The terminal bakes the same default token at compile time (`DTAP_TERMINAL_TOKEN` / `DTAP_GATEWAY_URL` via `option_env!`).
+Allowed CORS headers are `authorization`, `content-type`, and `x-dtap-mock-status`. Browser preflight is not authenticated. Every other route requires `Authorization: Bearer <DTAP_TERMINAL_TOKEN>` and returns `401` JSON `{"error":"unauthorized"}` otherwise. Nothing is baked into the terminal build. On the web, pair the device on `/pair` (gateway URL + terminal token, kept in that browser's localStorage); on desktop/mobile set `DTAP_GATEWAY_URL` and `DTAP_TERMINAL_TOKEN` at runtime. Unpaired, the terminal falls back to the public dev defaults, which only work against the local mock gateway.
 
 Mock invoices use a fixed **100000 USD/BTC demo** rate, so $5 is due as `5,000 sats`. QR payloads are prefixed `dtap-demo:` and labeled demo. There is no `OPEN FULL CHECKOUT` link in mock mode (the old `demo.dtap.local` host is not a real site). The counter only lists Lightning and on-chain Bitcoin. Monero, Liquid, stablecoins, and the exchange lab are not offered; the gateway cannot settle them.
 

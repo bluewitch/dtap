@@ -1,12 +1,12 @@
 use dioxus::prelude::*;
 
 mod api;
+mod config;
 mod nfc;
 mod views;
-use views::{Checkout, Swap, Terminal};
+use views::{Checkout, Pair, Swap, Terminal};
 
 const CSS: Asset = asset!("/assets/cyber.css");
-const FONTS: &str = "https://fonts.googleapis.com/css2?family=Orbitron:wght@500;800&family=JetBrains+Mono:wght@400;700&display=swap";
 
 #[derive(Routable, Clone, PartialEq)]
 pub enum Route {
@@ -17,6 +17,8 @@ pub enum Route {
     Checkout { invoice_id: String },
     #[route("/exchange")]
     Swap {},
+    #[route("/pair")]
+    Pair {},
 }
 
 fn main() {
@@ -27,7 +29,6 @@ fn main() {
 fn App() -> Element {
     rsx! {
         document::Meta { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" }
-        document::Link { rel: "stylesheet", href: FONTS }
         document::Link { rel: "stylesheet", href: CSS }
         Router::<Route> {}
     }
@@ -52,6 +53,9 @@ fn Shell() -> Element {
         main { class: "stage", Outlet::<Route> {} }
         nav { class: "tabbar",
             Link { to: Route::Terminal {}, class: "tab", active_class: "active", "▣ TERMINAL" }
+            Link { to: Route::Pair {}, class: "tab", active_class: "active",
+                if config::current().paired { "⚙ PAIRED" } else { "⚙ PAIR" }
+            }
         }
     }
 }
