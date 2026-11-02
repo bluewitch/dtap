@@ -331,6 +331,59 @@ pub fn Checkout(invoice_id: String) -> Element {
     }
 }
 
+// ───────────── PAIR ─────────────
+// Runtime pairing: the gateway URL and terminal token are entered on the device, not
+// compiled into the app. The token is never shown back after saving.
+#[component]
+pub fn Pair() -> Element {
+    let cfg = crate::config::current();
+    let mut gateway = use_signal(|| {
+        if cfg.paired {
+            cfg.gateway.clone()
+        } else {
+            String::new()
+        }
+    });
+    let mut token = use_signal(String::new);
+    let mut msg = use_signal(|| None::<String>);
+    let status = if cfg.paired {
+        format!("PAIRED // {}", cfg.gateway)
+    } else {
+        format!(
+            "NOT PAIRED // dev defaults ({}) for the local mock gateway",
+            crate::config::DEV_GATEWAY
+        )
+    };
+
+    rsx! {
+        section { class: "panel",
+            p { class: "label", "PAIR THIS TERMINAL" }
+            p { class: "mono", "{status}" }
+            p { class: "label", "GATEWAY URL" }
+            input { class: "field", r#type: "url", placeholder: "https://gateway.example", value: "{gateway}",
+                oninput: move |e| gateway.set(e.value()) }
+            p { class: "label", "TERMINAL TOKEN" }
+            input { class: "field", r#type: "password", autocomplete: "off", value: "{token}",
+                oninput: move |e| token.set(e.value()) }
+            button { class: "btn",
+                onclick: move |_| {
+                    match crate::config::save(&gateway(), &token()) {
+                        Ok(()) => { token.set(String::new()); msg.set(Some("SAVED. Reload to apply.".into())); }
+                        Err(e) => msg.set(Some(e)),
+                    }
+                },
+                "SAVE"
+            }
+            button { class: "btn ghost",
+                onclick: move |_| { crate::config::forget(); msg.set(Some("FORGOTTEN. Using dev defaults.".into())); },
+                "FORGET PAIRING"
+            }
+            if let Some(m) = msg() { p { class: "mono", "{m}" } }
+            p { class: "dim pitch", "Never enter a seed, xpub or BTCPay API key here. The terminal token only lets this device create charges on your gateway." }
+        }
+    }
+}
+
 // ───────────── EXCHANGE LAB ─────────────
 // Unlinked. The gateway cannot settle swaps, so the counter does not offer them.
 #[component]

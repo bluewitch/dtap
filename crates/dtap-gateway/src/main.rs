@@ -105,8 +105,41 @@ fn bind_addr() -> String {
     env_or_default("DTAP_BIND", DEFAULT_BIND)
 }
 
-fn terminal_token() -> String {
-    env_or_default("DTAP_TERMINAL_TOKEN", DEFAULT_TOKEN)
+/// Minimum length for a real terminal token (e.g. `openssl rand -hex 32` gives 64).
+const MIN_TOKEN_LEN: usize = 32;
+
+/// The public dev token is accepted only in mock mode. Outside mock mode the operator must
+/// set a long random DTAP_TERMINAL_TOKEN, or the gateway refuses to start.
+fn resolve_token(mock: bool, configured: Option<&str>) -> Result<String, String> {
+    let configured = configured.map(str::trim).filter(|t| !t.is_empty());
+    match (mock, configured) {
+        (true, None) => Ok(DEFAULT_TOKEN.to_string()),
+        (true, Some(t)) => Ok(t.to_string()),
+        (false, None) => Err("DTAP_TERMINAL_TOKEN is required outside mock mode".into()),
+        (false, Some(t)) if t == DEFAULT_TOKEN => {
+            Err("the public dev token cannot be used outside mock mode; set a new random DTAP_TERMINAL_TOKEN".into())
+        }
+        (false, Some(t)) if t.len() < MIN_TOKEN_LEN => {
+            Err(format!("DTAP_TERMINAL_TOKEN must be at least {MIN_TOKEN_LEN} characters outside mock mode"))
+        }
+        (false, Some(t)) => Ok(t.to_string()),
+    }
+}
+
+fn terminal_token(mock: bool) -> String {
+    let configured = std::env::var("DTAP_TERMINAL_TOKEN").ok();
+    resolve_token(mock, configured.as_deref()).unwrap_or_else(|err| {
+        eprintln!("dtap-gateway: {err}");
+        std::process::exit(2);
+    })
+}
+
+/// Compare without an early exit on the first differing byte.
+fn ct_eq(a: &[u8], b: &[u8]) -> bool {
+    if a.len() != b.len() {
+        return false;
+    }
+    a.iter().zip(b).fold(0u8, |acc, (x, y)| acc | (x ^ y)) == 0
 }
 
 fn cors_origins(configured: &str) -> Vec<HeaderValue> {
@@ -148,7 +181,7 @@ fn bearer_matches(headers: &HeaderMap, expected: &str) -> bool {
     let Some((scheme, token)) = raw.split_once(' ') else {
         return false;
     };
-    scheme.eq_ignore_ascii_case("bearer") && token.trim() == expected
+    scheme.eq_ignore_ascii_case("bearer") && ct_eq(token.trim().as_bytes(), expected.as_bytes())
 }
 
 async fn require_bearer(
@@ -370,7 +403,7 @@ async fn main() {
     let state = AppState {
         mock: mode.mock,
         blackvault: mode.blackvault,
-        token: terminal_token(),
+        token: terminal_token(mode.mock),
         charges: Arc::new(Mutex::new(HashMap::new())),
     };
     let app = router(state);
@@ -573,6 +606,19 @@ mod tests {
         );
         assert!(bearer_matches(&headers, DEFAULT_TOKEN));
         assert!(!bearer_matches(&headers, ""));
+    }
+
+    #[test]
+    fn dev_token_only_in_mock_mode() {
+        assert_eq!(resolve_token(true, None).unwrap(), DEFAULT_TOKEN);
+        assert!(resolve_token(false, None).is_err());
+        assert!(resolve_token(false, Some(DEFAULT_TOKEN)).is_err());
+        assert!(resolve_token(false, Some("too-short")).is_err());
+        let real = "a".repeat(MIN_TOKEN_LEN);
+        assert_eq!(resolve_token(false, Some(&real)).unwrap(), real);
+        assert!(ct_eq(b"abc", b"abc"));
+        assert!(!ct_eq(b"abc", b"abd"));
+        assert!(!ct_eq(b"abc", b"abcd"));
     }
 
     #[test]

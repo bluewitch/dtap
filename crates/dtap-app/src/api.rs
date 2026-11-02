@@ -1,16 +1,10 @@
 use dtap_core::*;
 use serde::{de::DeserializeOwned, Deserialize};
 
-// Build-time config: DTAP_GATEWAY_URL=https://... dx serve
-// Defaults match the mock gateway. BTCPay keys never belong in this crate.
-const GATEWAY: &str = match option_env!("DTAP_GATEWAY_URL") {
-    Some(u) => u,
-    None => "http://127.0.0.1:8787",
-};
-const TOKEN: &str = match option_env!("DTAP_TERMINAL_TOKEN") {
-    Some(t) => t,
-    None => "dev-terminal-token",
-};
+use crate::config;
+
+// Gateway URL and terminal token are runtime config (see config.rs), never baked into
+// the build. BTCPay keys never belong in this crate.
 
 async fn decode<T: DeserializeOwned>(r: reqwest::Response) -> Result<T, String> {
     let status = r.status();
@@ -21,9 +15,10 @@ async fn decode<T: DeserializeOwned>(r: reqwest::Response) -> Result<T, String> 
 }
 
 async fn get<T: DeserializeOwned>(path: &str) -> Result<T, String> {
+    let cfg = config::current();
     let r = reqwest::Client::new()
-        .get(format!("{GATEWAY}{path}"))
-        .bearer_auth(TOKEN)
+        .get(format!("{}{path}", cfg.gateway))
+        .bearer_auth(&cfg.token)
         .send()
         .await
         .map_err(|e| e.to_string())?;
@@ -31,9 +26,10 @@ async fn get<T: DeserializeOwned>(path: &str) -> Result<T, String> {
 }
 
 async fn post<B: serde::Serialize, T: DeserializeOwned>(path: &str, body: &B) -> Result<T, String> {
+    let cfg = config::current();
     let r = reqwest::Client::new()
-        .post(format!("{GATEWAY}{path}"))
-        .bearer_auth(TOKEN)
+        .post(format!("{}{path}", cfg.gateway))
+        .bearer_auth(&cfg.token)
         .json(body)
         .send()
         .await

@@ -36,17 +36,13 @@ impl Rail {
         u == "BTC-LN" || u.contains("LIGHTNING")
     }
 
+    /// Only Lightning and on-chain Bitcoin are supported. Any other rail id a backend
+    /// might return (Monero, Liquid, stablecoins, ...) is shown as unsupported, never by name.
     pub fn css(&self) -> &'static str {
         let u = self.up();
-        if u.contains("USDT") || u.contains("USDC") {
-            "stable"
-        } else if self.is_lightning() || u.contains("LNURL") {
+        if self.is_lightning() || u.contains("LNURL") {
             "ln"
-        } else if u.starts_with("XMR") {
-            "xmr"
-        } else if u.starts_with("LBTC") {
-            "liquid"
-        } else if u.starts_with("BTC") {
+        } else if u == "BTC" || u == "BTC-CHAIN" || u == "BTC-ONCHAIN" {
             "btc"
         } else {
             "alt"
@@ -55,12 +51,34 @@ impl Rail {
 
     pub fn label(&self) -> &'static str {
         match self.css() {
-            "stable" => "◈ STABLECOIN",
             "ln" => "⚡ LIGHTNING",
-            "xmr" => "ɱ MONERO",
-            "liquid" => "◆ LIQUID",
             "btc" => "₿ ON-CHAIN",
-            _ => "◇ ALT RAIL",
+            _ => "◇ UNSUPPORTED RAIL",
+        }
+    }
+}
+
+#[cfg(test)]
+mod rail_tests {
+    use super::*;
+
+    fn rail(id: &str) -> Rail {
+        Rail {
+            id: id.into(),
+            destination: String::new(),
+            payment_link: None,
+            amount_due: String::new(),
+            rate: String::new(),
+        }
+    }
+
+    #[test]
+    fn only_bitcoin_rails_are_named() {
+        assert_eq!(rail("BTC-LN").label(), "⚡ LIGHTNING");
+        assert_eq!(rail("BTC").label(), "₿ ON-CHAIN");
+        for id in ["XMR", "LBTC", "USDT", "USDC", "BTC-LIQUID", "LTC"] {
+            assert_eq!(rail(id).css(), "alt", "{id}");
+            assert_eq!(rail(id).label(), "◇ UNSUPPORTED RAIL", "{id}");
         }
     }
 }
